@@ -1,0 +1,26 @@
+#rope {
+  right: 2%;
+  width: 15%;
+  height: 76%;
+  padding-inline: 3%;
+}
+
+#rope::before {
+  content: "";
+  position: absolute;
+  inset: 0 -18%;
+}
+
+#rope img,
+#rope span {
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+#speech span {
+  display: inline;
+}
+
+#speech span:last-child {
+  animation: appear .35s ease-out both;
+}

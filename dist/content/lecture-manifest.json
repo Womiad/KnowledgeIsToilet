@@ -1,0 +1,13 @@
+{"lectures":[
+{"id":"chinese","subject":"國文","title":"閱讀理解中的文意、修辭與脈絡","text":"/content/lectures/chinese.md","audio":"/audio/lectures/chinese.mp3"},
+{"id":"english","subject":"英文","title":"關係子句與篇章閱讀","text":"/content/lectures/english.md","audio":"/audio/lectures/english.mp3"},
+{"id":"math-a","subject":"數學 A","title":"指數、對數與函數模型","text":"/content/lectures/math-a.md","audio":"/audio/lectures/math-a.mp3"},
+{"id":"math-b","subject":"數學 B","title":"資料分析與條件機率","text":"/content/lectures/math-b.md","audio":"/audio/lectures/math-b.mp3"},
+{"id":"history","subject":"歷史","title":"近代國家形成與世界體系","text":"/content/lectures/history.md","audio":"/audio/lectures/history.mp3"},
+{"id":"geography","subject":"地理","title":"季風、氣候系統與人類活動","text":"/content/lectures/geography.md","audio":"/audio/lectures/geography.mp3"},
+{"id":"civics","subject":"公民與社會","title":"權利保障、政府與市場","text":"/content/lectures/civics.md","audio":"/audio/lectures/civics.mp3"},
+{"id":"physics","subject":"物理","title":"牛頓運動定律與能量","text":"/content/lectures/physics.md","audio":"/audio/lectures/physics.mp3"},
+{"id":"chemistry","subject":"化學","title":"化學鍵、反應速率與平衡","text":"/content/lectures/chemistry.md","audio":"/audio/lectures/chemistry.mp3"},
+{"id":"biology","subject":"生物","title":"細胞代謝、遺傳與演化","text":"/content/lectures/biology.md","audio":"/audio/lectures/biology.mp3"},
+{"id":"earth-science","subject":"地球科學","title":"板塊、大氣與海洋系統","text":"/content/lectures/earth-science.md","audio":"/audio/lectures/earth-science.mp3"}
+]}

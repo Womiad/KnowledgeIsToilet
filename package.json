@@ -1,0 +1,16 @@
+{
+  "name": "classroom-is-a-toilet",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "generate-tts": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -STA -ExecutionPolicy Bypass -File scripts/generate-tts.ps1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}
