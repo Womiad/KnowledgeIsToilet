@@ -4,6 +4,7 @@ import { clamp, lerp } from '../utils/math';
 export class AudioSystem {
   private ctx?: AudioContext; private master?: GainNode; private filter?: BiquadFilterNode; private highpass?: BiquadFilterNode;
   private ambience?: GainNode; private gurgleGain?: GainNode; private wetGain?: GainNode; private delay?: DelayNode; private feedback?: GainNode; private gurgle?: HTMLAudioElement; private media?: HTMLAudioElement;
+  private lectureSource?:AudioBufferSourceNode;private lectureStartedAt=0;private lectureDuration:number=CONFIG.lectureDuration;private flushBuffer?:AudioBuffer;
   private utterance?: SpeechSynthesisUtterance; private started = false;
 
   async start(text: string, audioPath?: string, onEnded?:()=>void): Promise<void> {
@@ -15,13 +16,9 @@ export class AudioSystem {
     this.createEchoPath();
     this.createUnderwaterAmbience();
     this.createGurgleTrack();
+    void this.prepareFlushSound();
     if (audioPath && await this.exists(audioPath)) {
-      this.media = new Audio(`${import.meta.env.BASE_URL}${audioPath.replace(/^\//, '')}`);
-      this.media.preload='auto';this.media.setAttribute('playsinline','');
-      this.media.onended=()=>onEnded?.();
-      this.media.crossOrigin = 'anonymous';
-      const source = this.ctx.createMediaElementSource(this.media); source.connect(this.highpass);
-      await this.media.play();
+      await this.playLectureBuffer(audioPath,onEnded);
     } else {
       this.utterance = new SpeechSynthesisUtterance(text);
       this.utterance.onend=()=>onEnded?.();
@@ -35,12 +32,8 @@ export class AudioSystem {
 
   async continueLecture(text:string,audioPath?:string,onEnded?:()=>void):Promise<void>{
     speechSynthesis.cancel();
-    if(audioPath&&this.media){
-      this.media.pause();
-      this.media.autoplay=true;
-      this.media.src=`${import.meta.env.BASE_URL}${audioPath.replace(/^\//,'')}`;
-      this.media.onended=()=>onEnded?.();
-      await this.media.play();
+    if(audioPath&&this.ctx&&this.highpass){
+      await this.playLectureBuffer(audioPath,onEnded);
     }else{
       this.utterance=new SpeechSynthesisUtterance(text);
       this.utterance.lang='zh-TW';this.utterance.rate=.92;this.utterance.pitch=.86;this.utterance.onend=()=>onEnded?.();
@@ -50,6 +43,9 @@ export class AudioSystem {
   }
 
   private async exists(path: string) { try { const response=await fetch(`${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`, { method: 'HEAD' }); return response.ok && (response.headers.get('content-type')??'').startsWith('audio/'); } catch { return false; } }
+  private async decode(path:string){if(!this.ctx)throw new Error('AudioContext unavailable');const data=await fetch(`${import.meta.env.BASE_URL}${path.replace(/^\//,'')}`).then(r=>r.arrayBuffer());return this.ctx.decodeAudioData(data);}
+  private async playLectureBuffer(path:string,onEnded?:()=>void){if(!this.ctx||!this.highpass)return;this.lectureSource?.stop();const buffer=await this.decode(path);const source=this.ctx.createBufferSource();source.buffer=buffer;source.connect(this.highpass);source.onended=()=>{if(this.lectureSource===source)onEnded?.();};this.lectureSource=source;this.lectureDuration=buffer.duration;this.lectureStartedAt=this.ctx.currentTime;source.start();}
+  private async prepareFlushSound(){try{this.flushBuffer=await this.decode('/audio/tolet.mp3');}catch{this.flushBuffer=undefined;}}
   private createUnderwaterAmbience() {
     if (!this.ctx || !this.master) return;
     this.ambience = this.ctx.createGain(); this.ambience.gain.value = 0;
@@ -91,11 +87,12 @@ export class AudioSystem {
     if (!this.ctx || !this.master) return;
     const now = this.ctx.currentTime; this.master.gain.cancelScheduledValues(now); this.master.gain.setValueAtTime(this.master.gain.value, now); this.master.gain.exponentialRampToValueAtTime(0.001, now + CONFIG.flush.duration);
     if(this.gurgleGain){this.gurgleGain.gain.cancelScheduledValues(now);this.gurgleGain.gain.setValueAtTime(this.gurgleGain.gain.value,now);this.gurgleGain.gain.exponentialRampToValueAtTime(.001,now+CONFIG.flush.duration);}
-    const flush = new Audio(`${import.meta.env.BASE_URL}audio/tolet.mp3`); flush.volume = 0.9; void flush.play();
-    setTimeout(() => { speechSynthesis.cancel(); this.media?.pause(); this.gurgle?.pause(); }, CONFIG.flush.duration*1000);
+    if(this.flushBuffer){const source=this.ctx.createBufferSource();const gain=this.ctx.createGain();source.buffer=this.flushBuffer;gain.gain.value=.9;source.connect(gain).connect(this.ctx.destination);source.start();}
+    setTimeout(() => { speechSynthesis.cancel(); this.lectureSource?.stop(); this.media?.pause(); }, CONFIG.flush.duration*1000);
   }
+  async restartAfterSilence(text:string,audioPath?:string,onEnded?:()=>void){if(!this.ctx||!this.master)return;await this.ctx.resume();const now=this.ctx.currentTime;this.master.gain.cancelScheduledValues(now);this.master.gain.setValueAtTime(1,now);this.gurgleGain?.gain.cancelScheduledValues(now);this.gurgleGain?.gain.setValueAtTime(0,now);if(audioPath)await this.playLectureBuffer(audioPath,onEnded);else await this.continueLecture(text,undefined,onEnded);}
   stop() { speechSynthesis.cancel(); this.media?.pause(); this.gurgle?.pause(); void this.ctx?.close(); this.started = false; }
-  get currentTime() { return this.media?.currentTime ?? (this.ctx?.currentTime ?? 0); }
-  get duration() { return this.media && Number.isFinite(this.media.duration) && this.media.duration>0 ? this.media.duration : CONFIG.lectureDuration; }
+  get currentTime() { return this.lectureSource&&this.ctx?Math.max(0,this.ctx.currentTime-this.lectureStartedAt):(this.media?.currentTime??0); }
+  get duration() { return this.lectureDuration; }
   get isStarted() { return this.started; }
 }
