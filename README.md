@@ -48,3 +48,4 @@ npm run preview
 - 作業系統若沒有 zh-TW 語音，Browser TTS 會退回其他中文語音。
 - 已生成的 MP3 能完整通過 Web Audio 水下濾波與 echo。若刪除某科 MP3，該科才會退回 SpeechSynthesis。
 - 不同瀏覽器的 SpeechSynthesis 長文暫停行為可能不同，Chrome/Edge 的相容性最佳。
+
