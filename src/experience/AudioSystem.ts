@@ -17,6 +17,7 @@ export class AudioSystem {
     this.createGurgleTrack();
     if (audioPath && await this.exists(audioPath)) {
       this.media = new Audio(`${import.meta.env.BASE_URL}${audioPath.replace(/^\//, '')}`);
+      this.media.preload='auto';this.media.setAttribute('playsinline','');
       this.media.onended=()=>onEnded?.();
       this.media.crossOrigin = 'anonymous';
       const source = this.ctx.createMediaElementSource(this.media); source.connect(this.highpass);
@@ -34,11 +35,11 @@ export class AudioSystem {
 
   async continueLecture(text:string,audioPath?:string,onEnded?:()=>void):Promise<void>{
     speechSynthesis.cancel();
-    if(audioPath&&this.media&&await this.exists(audioPath)){
+    if(audioPath&&this.media){
       this.media.pause();
+      this.media.autoplay=true;
       this.media.src=`${import.meta.env.BASE_URL}${audioPath.replace(/^\//,'')}`;
       this.media.onended=()=>onEnded?.();
-      this.media.load();
       await this.media.play();
     }else{
       this.utterance=new SpeechSynthesisUtterance(text);
