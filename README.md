@@ -1,5 +1,7 @@
 # 教室就是馬桶
 
+## [立即體驗作品](https://womiad.github.io/KnowledgeIsToilet/)
+
 以 Canvas 2D、Web Audio API 與瀏覽器語音合成製作的互動聲音作品。老師持續講課，文字逸出講義泡泡，資訊與水一起淹沒教室；向下拉右側沖水繩可把一切吸走。
 
 ## 執行
