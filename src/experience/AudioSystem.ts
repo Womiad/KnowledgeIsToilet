@@ -32,6 +32,22 @@ export class AudioSystem {
     this.started = true;
   }
 
+  async continueLecture(text:string,audioPath?:string,onEnded?:()=>void):Promise<void>{
+    speechSynthesis.cancel();
+    if(audioPath&&this.media&&await this.exists(audioPath)){
+      this.media.pause();
+      this.media.src=`${import.meta.env.BASE_URL}${audioPath.replace(/^\//,'')}`;
+      this.media.onended=()=>onEnded?.();
+      this.media.load();
+      await this.media.play();
+    }else{
+      this.utterance=new SpeechSynthesisUtterance(text);
+      this.utterance.lang='zh-TW';this.utterance.rate=.92;this.utterance.pitch=.86;this.utterance.onend=()=>onEnded?.();
+      const voices=speechSynthesis.getVoices();this.utterance.voice=voices.find(v=>/zh[-_]TW/i.test(v.lang))??voices.find(v=>v.lang.startsWith('zh'))??null;
+      speechSynthesis.speak(this.utterance);
+    }
+  }
+
   private async exists(path: string) { try { const response=await fetch(`${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`, { method: 'HEAD' }); return response.ok && (response.headers.get('content-type')??'').startsWith('audio/'); } catch { return false; } }
   private createUnderwaterAmbience() {
     if (!this.ctx || !this.master) return;
