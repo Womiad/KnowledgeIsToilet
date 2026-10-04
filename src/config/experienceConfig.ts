@@ -2,7 +2,7 @@ export const CONFIG = {
   defaultLecture: 'physics',
   lectureDuration: 150,
   waterStartProgress: 0,
-  waterFullProgress: 0.96,
+  waterFullProgress: 0.82,
   teacherMouthY: 0.44,
   waveAmplitude: 0.012,
   waveSpeed: 1.0,
